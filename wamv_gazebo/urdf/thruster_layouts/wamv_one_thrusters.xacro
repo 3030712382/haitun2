@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<!-- plugin -->
+  <xacro:include filename="$(find wamv_description)/urdf/thrusters/engine.xacro" />
+  <xacro:engine prefix="moddle" position="-2.373776 0 0.318237" />
+  <gazebo>
+    <plugin name="wamv_gazebo_thrust" filename="libusv_gazebo_thrust_plugin.so">
+      <cmdTimeout>1.0</cmdTimeout>
+      <robotNamespace>${namespace}</robotNamespace>
+      <xacro:include filename="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_gazebo_thruster_config.xacro" />
+      <xacro:wamv_gazebo_thruster_config name="moddle" />
+    </plugin>
+  </gazebo>
+</robot>

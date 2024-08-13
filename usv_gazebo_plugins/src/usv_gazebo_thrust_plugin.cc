@@ -287,6 +287,10 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
+// _cmd：推进器的命令输入。
+// _maxCmd：命令的最大值。
+// _maxPos：推力的最大正向输出。
+// _maxNeg：推力的最大反向输出。
 double UsvThrust::ScaleThrustCmd(const double _cmd, const double _maxCmd,
   const double _maxPos, const double _maxNeg) const
 {
@@ -305,7 +309,12 @@ double UsvThrust::ScaleThrustCmd(const double _cmd, const double _maxCmd,
   return val;
 }
 
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////推进器的推力响应
+// _A 和 _K：分别表示函数的下界和上界。
+// _B：决定曲线的增长速率。
+// _v：影响曲线的形状。
+// _C 和 _M：影响曲线的水平偏移和位置。
+
 double UsvThrust::Glf(const double _x, const float _A, const float _K,
     const float _B, const float _v, const float _C, const float _M) const
 {
@@ -359,7 +368,7 @@ void UsvThrust::Update()
       ignition::math::Vector3d tforcev(0, 0, 0);
       switch (this->thrusters[i].mappingType)
       {
-        case 0:
+        case 0://线性映射 控制指令-->力
           tforcev.X() = this->ScaleThrustCmd(this->thrusters[i].currCmd,
                                            this->thrusters[i].maxCmd,
                                            this->thrusters[i].maxForceFwd,

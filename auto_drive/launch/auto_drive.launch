@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <!-- Joystick Driver -->
   <node pkg="joy" type="joy_node" name="joy">
@@ -13,11 +13,14 @@
   </node> -->
 
   <!-- Parameters -->
-  <arg name="boat_type" default="single"/>
+  <arg name="boat_type" default="double"/>
 
   <!-- Single motor boat -->
   <group if="$(eval arg('boat_type') == 'single')">
-    <node pkg="vrx_gazebo" type="twist2thrust.py" name="twist2thrust_single" output="screen">
+  <!-- cpp -->
+    <!-- <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen" args="single">   -->
+      <!-- python -->
+    <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen" args="single">  
       <param name="boat_type" value="single"/>
       <remap from="thrust_cmd" to="/wamv/thrusters/moddle_thrust_cmd"/>
       <remap from="angle_cmd" to="/wamv/thrusters/moddle_thrust_angle"/>
@@ -26,7 +29,10 @@
 
   <!-- Double motor boat -->
   <group if="$(eval arg('boat_type') == 'double')">
-    <node pkg="vrx_gazebo" type="twist2thrust.py" name="twist2thrust_double" output="screen">
+  <!-- cpp -->
+    <!-- <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen" args="double">  -->
+          <!-- python -->
+    <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen" args="double">  
       <param name="boat_type" value="double"/>
       <remap from="left_cmd" to="/wamv/thrusters/left_thrust_cmd"/>
       <remap from="right_cmd" to="/wamv/thrusters/right_thrust_cmd"/>
@@ -35,4 +41,8 @@
       
     </node>
   </group>
+<!-- 启动rqt动态调参 -->
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" />
+
+  <!-- <node pkg="dynamic_reconfigure" type="dynparam" name="dynparam" args="load  /auto_drive  $(find auto_drive)/cfg/PID.cfg" required="true"/> -->
 </launch>

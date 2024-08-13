@@ -1,4 +1,5 @@
-<?xml version="1.0"?>
+<?xml version="1.0"  encoding="UTF-8"?>
+<!-- 中文 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Macro to create a WAM-V with dyanmics plugins and a customizeable thruster layout -->
   <xacro:macro  name="wamv_gazebo" params="thruster_layout">

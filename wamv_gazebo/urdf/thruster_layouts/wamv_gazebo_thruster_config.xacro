@@ -11,11 +11,14 @@
       <enableAngle>true</enableAngle>
 
       <!-- Optional Parameters -->
-      <mappingType>1</mappingType>
+      <mappingType>0</mappingType>
       <maxCmd>1.0</maxCmd>
       <maxForceFwd>250.0</maxForceFwd>
       <maxForceRev>-100.0</maxForceRev>
-      <maxAngle>${pi/2}</maxAngle>
+      <!-- <maxCmd>1.0</maxCmd>
+      <maxForceFwd>250.0</maxForceFwd>
+      <maxForceRev>-100.0</maxForceRev> -->
+      <maxAngle>${pi/6}</maxAngle>
     </thruster>
   </xacro:macro>
 </plugin>
