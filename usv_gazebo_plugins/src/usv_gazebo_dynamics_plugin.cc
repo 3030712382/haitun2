@@ -119,7 +119,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   this->waveParams = nullptr;
 
-  // Get inertia and mass of vessel
+  // Get inertia and mass of vessel获取惯性和船只质量
   #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Vector3d kInertia =
       this->link->GetInertial()->PrincipalMoments();
@@ -130,7 +130,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     const double kMass = this->link->GetInertial()->GetMass();
   #endif
 
-  // Report some of the pertinent parameters for verification
+  // Report some of the pertinent parameters for verification报告一些有关验证的相关参数
   ROS_DEBUG("USV Dynamics Parameters: From URDF XACRO model definition");
   ROS_DEBUG_STREAM("Vessel Mass (rigid-body): " << kMass);
   ROS_DEBUG_STREAM("Vessel Inertia Vector (rigid-body): X:" << kInertia[0] <<
@@ -143,7 +143,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->prevUpdateTime = this->world->GetSimTime();
   #endif
 
-  // Listen to the update event broadcastes every physics iteration.
+  // Listen to the update event broadcastes every physics iteration.收听更新活动广播每个物理迭代。
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&UsvDynamicsPlugin::Update, this));
 
@@ -210,7 +210,7 @@ void UsvDynamicsPlugin::Update()
   #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
 
-  // Estimate the linear and angular accelerations.
+  // Estimate the linear and angular accelerations. 线速度 角加速度
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
   // appear to be unreliable
   const ignition::math::Vector3d kAccelLinearBody =
@@ -285,13 +285,13 @@ void UsvDynamicsPlugin::Update()
   {
   // Grid point in boat frame
   bpnt.setY((ii*2.0-1.0)*this->paramBoatWidth/2.0);
-  // For each length segment
+  // For each length segment对于每个长度段
     for (int jj = 1; jj <= this->paramLengthN; jj++)
     {
       bpnt.setX(((jj - 0.5) / (static_cast<float>(this->paramLengthN)) - 0.5) *
         this->paramBoatLength);
 
-      // Transform from vessel to water/world frame
+      // Transform from vessel to water/world frame从船只转变为水/世界框架
       bpntW = xformV * bpnt;
 
       // Debug
@@ -306,7 +306,7 @@ void UsvDynamicsPlugin::Update()
       ROS_DEBUG_STREAM("Z, pose: " << kPose.Pos().Z() << ", bpnt: "
         << bpntW.z() << ", dd: " << kDdz);
 
-      // Find vertical displacement of wave field
+      // Find vertical displacement of wave field找到波场的垂直位移
       // World location of grid point
       ignition::math::Vector3d X;
       X.X() = kPose.Pos().X() + bpntW.x();

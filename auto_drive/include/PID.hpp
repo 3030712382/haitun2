@@ -13,4 +13,5 @@ public:
     PID();
     ~PID();
     double PID_Calculate(double measured_value, double target_value);
+    double Calculate_angle(double measured_value, double target_value);//角度控制
 };

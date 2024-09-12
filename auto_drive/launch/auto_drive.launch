@@ -13,7 +13,7 @@
   </node> -->
 
   <!-- Parameters -->
-  <arg name="boat_type" default="double"/>
+  <arg name="boat_type" default="single"/>
 
   <!-- Single motor boat -->
   <group if="$(eval arg('boat_type') == 'single')">
@@ -30,9 +30,9 @@
   <!-- Double motor boat -->
   <group if="$(eval arg('boat_type') == 'double')">
   <!-- cpp -->
-    <!-- <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen" args="double">  -->
+    <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen" args="double"> 
           <!-- python -->
-    <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen" args="double">  
+    <!-- <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen" args="double">   -->
       <param name="boat_type" value="double"/>
       <remap from="left_cmd" to="/wamv/thrusters/left_thrust_cmd"/>
       <remap from="right_cmd" to="/wamv/thrusters/right_thrust_cmd"/>
@@ -42,7 +42,7 @@
     </node>
   </group>
 <!-- 启动rqt动态调参 -->
-  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" />
+  <!-- <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" /> -->
 
   <!-- <node pkg="dynamic_reconfigure" type="dynparam" name="dynparam" args="load  /auto_drive  $(find auto_drive)/cfg/PID.cfg" required="true"/> -->
 </launch>
