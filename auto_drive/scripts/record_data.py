@@ -66,7 +66,9 @@ class hdf5data:
             for name, array in self.data_dict.items():
                 # print(array)
                 root[name][...] = array
+                self.data_dict[name] = []
         print(f'Saved to {self.dataset_dir}')
+        # self.data_dict.clear()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

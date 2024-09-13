@@ -88,6 +88,10 @@ class Ui_MainWindow(object):
         self.pbdata.setText("开始录制")
         self.gridLayout_7.addWidget(self.pbdata, 1, 0, 2, 2)
 
+        self.pbreset = QtWidgets.QPushButton(self.centralwidget)
+        self.pbreset.setText("回到起点")
+        self.gridLayout_7.addWidget(self.pbreset, 2, 0, 2, 2)
+
         self.txname = QtWidgets.QLineEdit(self.centralwidget)
         # self.txname.setPlaceholderText("请输入名称")
         self.txname.setText("episode_1")
@@ -312,6 +316,7 @@ class Ui_MainWindow(object):
         self.pbMode.clicked.connect(MainWindow.switchmode)  # 模式切换
         self.targetmiddleline.valueChanged.connect(MainWindow.updatepid)
         self.pbdata.clicked.connect(MainWindow.save_hdf5)#点击开始保存数据
+        self.pbreset.clicked.connect(MainWindow.resetpose)#点击回到起点
         # self.txname.valueChanged.connect(MainWindow.)
         # self.Rudder.valueChanged.connect(MainWindow.debugrudder)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

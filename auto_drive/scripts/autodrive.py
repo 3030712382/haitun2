@@ -20,6 +20,8 @@ from dynamic_reconfigure.server import Server
 from geographic_msgs.msg import GeoPoint
 from geodesy.utm import fromMsg
 from gazebo_msgs.srv import GetModelState
+from gazebo_msgs.srv import SetModelState
+from gazebo_msgs.msg import ModelState
 from geometry_msgs.msg import Vector3Stamped
 import math
 from pyproj import Proj, transform
@@ -92,8 +94,13 @@ class Node(MyMainWindow,Ui_MainWindow):
         # self.auto_speed_pid = PID(0, 0, 0)
         #动态参数服务器
         # self.srv = Server(PIDConfig, self.pid_config_callback)
-        # 服务客户端
+        # 服务客户端 获取船舶在gazebo世界里的坐标#绝对值 当作gps使用
         self.wamv_client = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+        #更改 无人艇的状态
+        self.set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+        # 设置机器人位姿
+        self.state_msg = ModelState()
+
         # 状态消息
         self.states_msg = States()
         self.window_name = 'Image Window'
@@ -119,22 +126,12 @@ class Node(MyMainWindow,Ui_MainWindow):
         return config
 
     def save_hdf5(self):#存储hdf5文件
-        self.pbhdf5 = ~(self.pbhdf5)
+        self.pbhdf5 = ~(self.pbhdf5)#在pub_cmd函数中生效 必须开船之后才能录制数据
         if(self.pbhdf5):
             self.pbdata.setText(u'停止录制')  # 更新按钮名称
             self.pbdata.setStyleSheet("background-color: green; color: black;")
             print(self.txname.text())
             self.recorddata.hd_dir = self.txname.text()
-            # self.pos = [self.x,self.y,self.z,self.pitch,self.roll,self.yaw]
-            # self.vel = [self.Vx,self.Vy,self.Vz,0,0,0]
-            # self.motion = [0,0]
-            # self.action = [self.thrust,self.rudder]
-            # self.targetstate = [self.U,self.yaw]
-            # # for cam_name in self.camera_names:
-            # #     if self.cameras[cam_name] == None:
-            # #         return 0
-            # self.recorddata.update_data(np.array(self.pos),np.array(self.vel),np.array(self.motion),np.array(self.action),np.array(self.targetstate),self.cameras)
-            
             return 1
         else:
             self.recorddata.episode_idx = 1
@@ -165,7 +162,7 @@ class Node(MyMainWindow,Ui_MainWindow):
             #     response.pose.position.x, response.pose.position.y, response.pose.position.z))
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s" % e)
-    def run_stops(self):
+    def run_stops(self):#开船 / 停船
         self.move = ~(self.move)
         self.stopmode = self.move
         if(self.move):
@@ -312,7 +309,18 @@ class Node(MyMainWindow,Ui_MainWindow):
             lin_speed = output
             ang_speed = self.angle
             self.pub_cmd(lin_speed, ang_speed)
-
+    def resetpose(self):#一键初始化船舶位置 方便仿真实验
+        rospy.wait_for_service('/gazebo/set_model_state')
+        print("reset pose")
+        self.state_msg.model_name = 'wamv'  # 替换为你的机器人名称
+        self.state_msg.pose.position.x = 143.26
+        self.state_msg.pose.position.y = 94.92
+        self.state_msg.pose.position.z = -0.1
+        self.state_msg.pose.orientation.x = 0.0
+        self.state_msg.pose.orientation.y = 0.0
+        self.state_msg.pose.orientation.z = -0.466
+        self.state_msg.pose.orientation.w = 0.885
+        self.set_state(self.state_msg)
 if __name__ == '__main__':
     app = QApplication(sys.argv)  # 创建应用程序对象
     rospy.init_node('auto_drive')
