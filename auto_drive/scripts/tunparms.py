@@ -93,7 +93,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.is_serial_open = False
         self.move = False
         self.mode = 0
-        self.MODES = ["停止模式","遥控模式","航向模式","航速模式"]
+        self.MODES = ["停止模式","遥控模式","航向模式","航速模式","模仿模式"]
         self.pbMode.setText(self.MODES[self.mode])
         self.speed = 0
         self.angle = 0
@@ -104,7 +104,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.minout = 0
         self.targetxx = 180
         self.nowxx = 0
-        self.camera_names=["front_left_camera","front_right_camera"]
+        
         
         # self.__tail = 0x0A  # tail
         # 数据协议标识帧
@@ -265,7 +265,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         print("send ok")
     def switchmode(self):
         self.mode += 1
-        if(self.mode>=4):
+        if(self.mode>=5):
             self.mode = 0
         self.pbMode.setText(self.MODES[self.mode])
         self.speed = 0#停车

@@ -31,7 +31,7 @@ import sys
 from PyQt5.QtWidgets import QWidget, QApplication
 from tunparms import *#界面调参
 # from mainwindow import Ui_MainWindow
-
+from act.agent import *
 is_python2 = sys.version_info[0] < 3
 
 if is_python2:
@@ -65,8 +65,8 @@ class Node(MyMainWindow,Ui_MainWindow):
         self.z = 0
         self.thrust = 0#油门
         self.rudder = 0#舵角
-        self.pos = []#[x y z pitch roll yaw]
-        self.vel = []#[u v r dpitch droll dyaw] 
+        self.pos = []#[x y z pitch roll yaw]位置 姿态
+        self.vel = []#[u v r dpitch droll dyaw] 速度 角速度
         self.motion = []#[thrust rudder] 
         self.action = []#[throttle rudder]
         self.targetstate = []#[u  yaw] 
@@ -74,6 +74,7 @@ class Node(MyMainWindow,Ui_MainWindow):
         self.pbhdf5 = 0
         self.bridge = CvBridge()
         self.cv_img = None#更新摄像头画面
+        self.camera_names=["front_left_camera","front_right_camera"]
         self.recorddata = hdf5data(dataset_dir="/home/hp-t4/data/berthing",camera_names = self.camera_names)#数据存储
         # Initialize ROS publishers and subscribers
         if self.boat_type == "single":
@@ -118,6 +119,8 @@ class Node(MyMainWindow,Ui_MainWindow):
             self.cameras[camera_name] = []
             self.image_sub = rospy.Subscriber("/wamv/sensors/cameras/" + camera_name + "/image_raw", Image, self.image_callback,callback_args=camera_name)
         # self.image_sub = rospy.Subscriber("/wamv/sensors/cameras/front_right_camera/image_raw", Image, self.image_callback)
+        self.professor = professor(vars(parse_arguments()))
+
     def pid_config_callback(self, config, level):#动态参数服务器 未使用
         self.auto_head_pid.Kp = config.HeadKp
         self.auto_head_pid.Ki = config.HeadKi
@@ -209,6 +212,8 @@ class Node(MyMainWindow,Ui_MainWindow):
 
         return np.array([roll, pitch, yaw])
     def joy_callback(self, data):
+        self.pos = [self.x,self.y,self.z,self.pitch,self.roll,self.yaw]
+        self.vel = [self.Vx,self.Vy,self.Vz,0,0,0]
         if self.MODES[self.mode] == "遥控模式":
             lin_speed = data.axes[1] * self.linear_scaling
             ang_speed = data.axes[3] * self.angular_scaling*30
@@ -216,6 +221,9 @@ class Node(MyMainWindow,Ui_MainWindow):
             if buttons[0] == 1 and self.last_buttons and self.last_buttons[0] == 0:
                 self.stopmode = not self.stopmode
                 rospy.loginfo("Mode: %s" % ("start" if self.stopmode else "stop"))
+            target_qpos = self.professor.infer(self.cameras,np.array(self.pos),np.array(self.vel))
+            target_qpos[1] = target_qpos[1]*180.0/pi
+            print("target_qpos: ",target_qpos,"now pos: ",self.pos,"now vel: ",self.vel)
             self.pub_cmd(lin_speed, ang_speed)
             self.last_buttons = buttons
         else:
@@ -248,6 +256,8 @@ class Node(MyMainWindow,Ui_MainWindow):
                 self.right_pub.publish(right_msg)
                 self.left_thrust_angle.publish(left_angle_msg)
                 self.right_thrust_angle.publish(right_angle_msg)
+        # self.pos = [self.x,self.y,self.z,self.pitch,self.roll,self.yaw]
+        # self.vel = [self.Vx,self.Vy,self.Vz,0,0,0]
         if self.pbhdf5:
             self.pos = [self.x,self.y,self.z,self.pitch,self.roll,self.yaw]
             self.vel = [self.Vx,self.Vy,self.Vz,0,0,0]
@@ -309,6 +319,13 @@ class Node(MyMainWindow,Ui_MainWindow):
             lin_speed = output
             ang_speed = self.angle
             self.pub_cmd(lin_speed, ang_speed)
+        if self.MODES[self.mode] == "模仿模式":
+            target_qpos = self.professor.infer(self.cameras,np.array(self.pos),np.array(self.vel))
+            
+            lin_speed = target_qpos[0]
+            ang_speed = target_qpos[1]* 180.0/pi  
+            self.pub_cmd(lin_speed, ang_speed)
+            print("Middle motor: %.5f, Rudder angle: %.5f",lin_speed,ang_speed)
     def resetpose(self):#一键初始化船舶位置 方便仿真实验
         rospy.wait_for_service('/gazebo/set_model_state')
         print("reset pose")
@@ -322,16 +339,25 @@ class Node(MyMainWindow,Ui_MainWindow):
         self.state_msg.pose.orientation.w = 0.885
         self.set_state(self.state_msg)
 if __name__ == '__main__':
-    app = QApplication(sys.argv)  # 创建应用程序对象
+    args = rospy.myargv(argv=sys.argv)
+    argv=sys.argv
+    # argv=sys.argv
+    # if len(sys.argv) > 1:
+    #     my_arg = sys.argv[1]
+    # args, unknown = parser.parse_known_args(rospy.myargv(argv=sys.argv))
+    # app_args = sys.argv[:1] + unknown  # 使用 sys.argv 来生成应用程序参数
+    print("args: ",args,"argv: ",argv)
+    app = QApplication(args)  # 创建应用程序对象
     rospy.init_node('auto_drive')
     linear_scaling = 1.0
     angular_scaling = - pi / 6.0
     boat_type = rospy.get_param("~boat_type", "single")
-    rospy.loginfo("Init %s boat", boat_type)
+    # rospy.loginfo("Init %s boat", boat_type)
     
     # th1 = threading.Thread(target=MainWindow.showpig())  # 串口读取线程
     # th1.start()
     # window1 = MyMainWindow()
+    boat_type = "single"
     node = Node(linear_scaling, angular_scaling, boat_type)
     node.show()  # 显示主窗口
     # rospy.spin()

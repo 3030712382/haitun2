@@ -20,8 +20,21 @@
   <!-- cpp -->
     <!-- <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen" args="single">   -->
       <!-- python -->
-    <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen" args="single">  
+    <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen">  
       <param name="boat_type" value="single"/>
+      <param name="task_name" value="sim_berthing"/>
+      <param name="eval" value="sim_berthing"/>
+      <param name="ckpt_dir" value="/home/hp-t4/imlearning/sim_berthing"/>
+      <param name="policy_class" value="ACT"/>
+      <param name="kl_weight" value="10"  type="int"/>
+      <param name="state_dim" value="12"  type="int"/>
+      <param name="chunk_size" value="100"  type="int"/>
+      <param name="hidden_dim" value="512"  type="int"/>
+      <param name="batch_size" value="4"  type="int"/>
+      <param name="dim_feedforward" value="3200"  type="int"/>
+      <param name="num_epochs" value="2000"  type="int"/>
+      <param name="lr" value="1e-5"  type="double"/>
+      <param name="seed" value="0"  type="int"/>
       <remap from="thrust_cmd" to="/wamv/thrusters/moddle_thrust_cmd"/>
       <remap from="angle_cmd" to="/wamv/thrusters/moddle_thrust_angle"/>
     </node>
@@ -30,10 +43,22 @@
   <!-- Double motor boat -->
   <group if="$(eval arg('boat_type') == 'double')">
   <!-- cpp -->
-    <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen" args="double"> 
-          <!-- python -->
-    <!-- <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen" args="double">   -->
+    <!-- <node pkg="auto_drive" type="auto_drive" name="auto_drive_node" output="screen">  -->
+          <!-- python  args="double" -->
+    <node pkg="auto_drive" type="autodrive.py" name="auto_drive_node" output="screen">  
       <param name="boat_type" value="double"/>
+      <param name="task_name" value="sim_berthing"/>
+      <param name="ckpt_dir" value="/home/hp-t4/imlearning/sim_berthing"/>
+      <param name="policy_class" value="ACT"/>
+      <param name="kl_weight" value="10"  type="int"/>
+      <param name="state_dim" value="12"  type="int"/>
+      <param name="chunk_size" value="100"  type="int"/>
+      <param name="hidden_dim" value="512"  type="int"/>
+      <param name="batch_size" value="4"  type="int"/>
+      <param name="dim_feedforward" value="3200"  type="int"/>
+      <param name="num_epochs" value="2000"  type="int"/>
+      <param name="lr" value="1e-5"  type="double"/>
+      <param name="seed" value="0"  type="int"/>
       <remap from="left_cmd" to="/wamv/thrusters/left_thrust_cmd"/>
       <remap from="right_cmd" to="/wamv/thrusters/right_thrust_cmd"/>
       <remap from="left_angle" to="/wamv/thrusters/left_thrust_angle"/>
